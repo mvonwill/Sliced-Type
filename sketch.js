@@ -121,7 +121,7 @@ function draw() {
 
   noFill();
   stroke(0);
-  strokeWeight(4);
+  strokeWeight(0);
   rect(0, 0, canvasWidth, canvasHeight);
 
   for (let ln of lines) { ln.update(); ln.display(); }
