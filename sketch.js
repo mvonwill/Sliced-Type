@@ -1,4 +1,4 @@
-// p5.js interactive TERRORIFIC with true additive overlap transitions
+// p5.js interactive TERRORIFIC with mobile cursor support
 let letters = [];
 let nextLetters = [];
 let lines = [];
@@ -28,12 +28,18 @@ let interFont;
 // Kerning pairs
 // -------------------------
 const kerningPairs = {
-  global: { 'TY': 5, 'AV': -3, 'LT': -2, 'LI': -1 },
+  global: {
+    'TY': 5,
+    'AV': -3,
+    'LT': -2,
+    'LI': -1
+  },
   LIGATURIST: { 'AT': -8 },
   SANSATION: { 'AT': -8 },
   GLYPHSCAPE: { 'LY': -6 }
 };
 
+// -------------------------
 function preload() {
   interFont = loadFont('Inter_24pt-Medium.ttf');
 }
@@ -51,8 +57,6 @@ function setup() {
 }
 
 // -------------------------
-// Setup letters
-// -------------------------
 function setupLetters(word = txt) {
   let newLetters = [];
   let totalWidth = textWidth(word);
@@ -66,7 +70,6 @@ function setupLetters(word = txt) {
 
     newLetters.push(new Letter(ch, currentX + w / 2, canvasHeight / 2 - textHeight / 2 + 15));
 
-    // Smart kerning system
     let pair = ch + nextCh;
     let adjustment = 0;
 
@@ -82,8 +85,6 @@ function setupLetters(word = txt) {
   return newLetters;
 }
 
-// -------------------------
-// Setup lines
 // -------------------------
 function setupLines(keepExisting = false) {
   if (!keepExisting) {
@@ -111,8 +112,6 @@ function setupLinesNext() {
 }
 
 // -------------------------
-// Main draw loop
-// -------------------------
 function draw() {
   background(255);
 
@@ -122,6 +121,7 @@ function draw() {
   for (let ln of linesOpposingNext) { ln.update(); ln.display(); }
 
   for (let l of letters) { l.update(); l.display(); }
+
   if (transitionStarted && nextLetters.length > 0) {
     for (let l of nextLetters) { l.update(); l.display(); }
   }
@@ -153,23 +153,7 @@ function draw() {
 }
 
 // -------------------------
-// Mouse interaction
-// -------------------------
 function mousePressed() {
-  handleInteraction(mouseX, mouseY);
-}
-
-// -------------------------
-// Touch interaction for mobile
-// -------------------------
-function touchStarted() {
-  if (touches.length > 0) {
-    handleInteraction(touches[0].x, touches[0].y);
-  }
-  return false; // prevents scrolling
-}
-
-function handleInteraction(x, y) {
   const wordRevealed = letters.every(l => l.isRevealed());
   if (wordRevealed && !exitStateActive) {
     exitStateActive = true;
@@ -177,8 +161,6 @@ function handleInteraction(x, y) {
   }
 }
 
-// -------------------------
-// Start next word
 // -------------------------
 function startNextWordImmediate() {
   transitionStarted = true;
@@ -189,7 +171,6 @@ function startNextWordImmediate() {
 
 // -------------------------
 // Letter class
-// -------------------------
 class Letter {
   constructor(char, x, y) {
     this.char = char;
@@ -322,7 +303,6 @@ class Letter {
 
 // -------------------------
 // Line class
-// -------------------------
 class Line {
   constructor(baseAngle) {
     this.baseAngle = baseAngle;
@@ -399,8 +379,7 @@ class Line {
 }
 
 // -------------------------
-// Orange cursor (desktop) and mobile touch pointer
-// -------------------------
+// Mobile + Desktop cursor
 let cursorBaseSize = 15;
 let cursorHoverSize = 15;
 let cursorPressSize = 23;
@@ -412,19 +391,27 @@ function drawCursor() {
   noStroke();
   fill(255, 120, 40);
 
-  let x = mouseX;
-  let y = mouseY;
+  let x = (touches.length > 0) ? touches[0].x : mouseX;
+  let y = (touches.length > 0) ? touches[0].y : mouseY;
 
-  // On mobile, use first touch
-  if (touches.length > 0) {
-    x = touches[0].x;
-    y = touches[0].y;
-    cursorTargetSize = cursorPressSize;
-  } else {
-    const isHovering = mouseX >= 0 && mouseX <= canvasWidth && mouseY >= 0 && mouseY <= canvasHeight;
-    cursorTargetSize = mouseIsPressed ? cursorPressSize : cursorBaseSize;
-  }
+  const isHovering = x >= 0 && x <= canvasWidth && y >= 0 && y <= canvasHeight;
+
+  cursorTargetSize = (isHovering && (mouseIsPressed || touches.length > 0)) ? cursorPressSize
+                    : (isHovering ? cursorHoverSize
+                    : cursorBaseSize);
 
   cursorCurrentSize = lerp(cursorCurrentSize, cursorTargetSize, 0.15);
+
   circle(x, y, cursorCurrentSize);
+}
+
+function touchStarted() {
+  mousePressed();
+  return false;
+}
+
+function touchMoved() {
+  mouseX = touches[0].x;
+  mouseY = touches[0].y;
+  return false;
 }
