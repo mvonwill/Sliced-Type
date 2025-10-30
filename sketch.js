@@ -385,9 +385,9 @@ class Line {
 // -------------------------
 // Smooth orange dot cursor
 // -------------------------
-let cursorBaseSize = 12;
-let cursorHoverSize = 16;
-let cursorPressSize = 15;
+let cursorBaseSize = 15;
+let cursorHoverSize = 15;
+let cursorPressSize = 23;
 let cursorCurrentSize = cursorBaseSize;
 let cursorTargetSize = cursorBaseSize;
 
