@@ -35,7 +35,7 @@ const kerningPairs = {
     'LI': -1
   },
   LIGATURIST: { 'AT': -8 },
-  SANSATION: { 'AT': -8 },
+  SANSATION: { 'AT': -9.5 },
   GLYPHSCAPE: { 'LY': -6 }
 };
 
