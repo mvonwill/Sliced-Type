@@ -119,11 +119,6 @@ function setupLinesNext() {
 function draw() {
   background(255);
 
-  noFill();
-  stroke(0);
-  strokeWeight(0);
-  rect(0, 0, canvasWidth, canvasHeight);
-
   for (let ln of lines) { ln.update(); ln.display(); }
   for (let ln of linesOpposing) { ln.update(); ln.display(); }
   for (let ln of linesNext) { ln.update(); ln.display(); }
