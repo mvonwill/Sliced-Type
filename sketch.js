@@ -1,4 +1,4 @@
-// p5.js interactive TERRORIFIC with true additive overlap transitions + mobile support
+// p5.js interactive TERRORIFIC with true additive overlap transitions
 let letters = [];
 let nextLetters = [];
 let lines = [];
@@ -34,9 +34,9 @@ const kerningPairs = {
     'LT': -2,
     'LI': -1
   },
-  LIGATURIST: {'AT': -8},
-  SANSATION: {'AT': -8},
-  GLYPHSCAPE: {'LY': -6}
+  LIGATURIST: { 'AT': -8 },
+  SANSATION: { 'AT': -8 },
+  GLYPHSCAPE: { 'LY': -6 }
 };
 
 function preload() {
@@ -51,12 +51,11 @@ function setup() {
 
   letters = setupLetters(txt);
   setupLines();
-
   entryStartTime = millis();
 }
 
 // -------------------------
-// Letters setup
+// Setup letters and kerning
 // -------------------------
 function setupLetters(word = txt) {
   let newLetters = [];
@@ -79,7 +78,6 @@ function setupLetters(word = txt) {
     } else if (kerningPairs.global[pair] !== undefined) {
       adjustment = kerningPairs.global[pair];
     }
-
     currentX += w + adjustment;
   }
 
@@ -87,7 +85,7 @@ function setupLetters(word = txt) {
 }
 
 // -------------------------
-// Lines setup
+// Setup lines
 // -------------------------
 function setupLines(keepExisting = false) {
   if (!keepExisting) {
@@ -115,15 +113,10 @@ function setupLinesNext() {
 }
 
 // -------------------------
-// Main draw loop
+// Draw loop
 // -------------------------
 function draw() {
   background(255);
-
-  noFill();
-  stroke(0);
-  strokeWeight(4);
-  rect(0, 0, canvasWidth, canvasHeight);
 
   for (let ln of lines) { ln.update(); ln.display(); }
   for (let ln of linesOpposing) { ln.update(); ln.display(); }
@@ -163,7 +156,7 @@ function draw() {
 }
 
 // -------------------------
-// Mouse/touch interaction
+// Mouse / touch interaction
 // -------------------------
 function mousePressed() {
   const wordRevealed = letters.every(l => l.isRevealed());
@@ -179,28 +172,6 @@ function startNextWordImmediate() {
   nextLetters = setupLetters(nextWord);
   setupLinesNext();
 }
-
-// -------------------------
-// Mobile touch mapping
-// -------------------------
-function touchStarted() {
-  if (touches.length > 0) {
-    mouseX = touches[0].x * (canvasWidth / width);
-    mouseY = touches[0].y * (canvasHeight / height);
-    mousePressed();
-  }
-  return false;
-}
-
-function touchMoved() {
-  if (touches.length > 0) {
-    mouseX = touches[0].x * (canvasWidth / width);
-    mouseY = touches[0].y * (canvasHeight / height);
-  }
-  return false;
-}
-
-function touchEnded() { return false; }
 
 // -------------------------
 // Letter class
@@ -414,7 +385,7 @@ class Line {
 }
 
 // -------------------------
-// Smooth orange dot cursor
+// Smooth orange dot cursor (desktop + mobile)
 // -------------------------
 let cursorBaseSize = 15;
 let cursorHoverSize = 15;
@@ -427,15 +398,25 @@ function drawCursor() {
   noStroke();
   fill(255, 120, 40);
 
-  const isHovering = mouseX >= 0 && mouseX <= canvasWidth && mouseY >= 0 && mouseY <= canvasHeight;
+  // Desktop
+  let x = mouseX;
+  let y = mouseY;
+  let isPressed = mouseIsPressed;
 
+  // Mobile touch
+  if (touches.length > 0) {
+    x = touches[0].x;
+    y = touches[0].y;
+    isPressed = true; // touch counts as pressed
+  }
+
+  const isHovering = x >= 0 && x <= canvasWidth && y >= 0 && y <= canvasHeight;
   if (isHovering) {
-    cursorTargetSize = mouseIsPressed ? cursorPressSize : cursorHoverSize;
+    cursorTargetSize = isPressed ? cursorPressSize : cursorHoverSize;
   } else {
     cursorTargetSize = cursorBaseSize;
   }
 
   cursorCurrentSize = lerp(cursorCurrentSize, cursorTargetSize, 0.15);
-
-  circle(mouseX, mouseY, cursorCurrentSize);
+  circle(x, y, cursorCurrentSize);
 }
