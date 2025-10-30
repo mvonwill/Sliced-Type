@@ -1,4 +1,4 @@
-// p5.js interactive TERRORIFIC with true additive overlap transitions
+// p5.js interactive TERRORIFIC with true additive overlap transitions + mobile support
 let letters = [];
 let nextLetters = [];
 let lines = [];
@@ -29,20 +29,14 @@ let interFont;
 // -------------------------
 const kerningPairs = {
   global: {
-    'TY': 5,  // wider
+    'TY': 5,
     'AV': -3,
     'LT': -2,
     'LI': -1
   },
-  LIGATURIST: {
-    'AT': -8
-  },
-  SANSATION: {
-    'AT': -8
-  },
-  GLYPHSCAPE: {
-    'LY': -6  // bring L and Y closer
-  }
+  LIGATURIST: {'AT': -8},
+  SANSATION: {'AT': -8},
+  GLYPHSCAPE: {'LY': -6}
 };
 
 function preload() {
@@ -61,6 +55,9 @@ function setup() {
   entryStartTime = millis();
 }
 
+// -------------------------
+// Letters setup
+// -------------------------
 function setupLetters(word = txt) {
   let newLetters = [];
   let totalWidth = textWidth(word);
@@ -74,11 +71,9 @@ function setupLetters(word = txt) {
 
     newLetters.push(new Letter(ch, currentX + w / 2, canvasHeight / 2 - textHeight / 2 + 15));
 
-    // Smart kerning system
     let pair = ch + nextCh;
     let adjustment = 0;
 
-    // Check for word-specific kerning
     if (kerningPairs[word] && kerningPairs[word][pair] !== undefined) {
       adjustment = kerningPairs[word][pair];
     } else if (kerningPairs.global[pair] !== undefined) {
@@ -91,6 +86,9 @@ function setupLetters(word = txt) {
   return newLetters;
 }
 
+// -------------------------
+// Lines setup
+// -------------------------
 function setupLines(keepExisting = false) {
   if (!keepExisting) {
     lines = [];
@@ -116,8 +114,16 @@ function setupLinesNext() {
   for (let l of linesOpposingNext) { l.localAlpha = 0; l.isFadingIn = true; }
 }
 
+// -------------------------
+// Main draw loop
+// -------------------------
 function draw() {
   background(255);
+
+  noFill();
+  stroke(0);
+  strokeWeight(4);
+  rect(0, 0, canvasWidth, canvasHeight);
 
   for (let ln of lines) { ln.update(); ln.display(); }
   for (let ln of linesOpposing) { ln.update(); ln.display(); }
@@ -156,6 +162,9 @@ function draw() {
   drawCursor();
 }
 
+// -------------------------
+// Mouse/touch interaction
+// -------------------------
 function mousePressed() {
   const wordRevealed = letters.every(l => l.isRevealed());
   if (wordRevealed && !exitStateActive) {
@@ -172,7 +181,29 @@ function startNextWordImmediate() {
 }
 
 // -------------------------
-// Letter class (unchanged)
+// Mobile touch mapping
+// -------------------------
+function touchStarted() {
+  if (touches.length > 0) {
+    mouseX = touches[0].x * (canvasWidth / width);
+    mouseY = touches[0].y * (canvasHeight / height);
+    mousePressed();
+  }
+  return false;
+}
+
+function touchMoved() {
+  if (touches.length > 0) {
+    mouseX = touches[0].x * (canvasWidth / width);
+    mouseY = touches[0].y * (canvasHeight / height);
+  }
+  return false;
+}
+
+function touchEnded() { return false; }
+
+// -------------------------
+// Letter class
 // -------------------------
 class Letter {
   constructor(char, x, y) {
@@ -305,7 +336,7 @@ class Letter {
 }
 
 // -------------------------
-// Line class (unchanged)
+// Line class
 // -------------------------
 class Line {
   constructor(baseAngle) {
